@@ -1,0 +1,13 @@
+@host = httpbin.org
+
+GET https://{{host}}/get?foo=bar
+Accept: application/json
+
+###
+
+POST https://{{host}}/post
+Content-Type: application/json
+
+{
+  "hello": "world"
+}

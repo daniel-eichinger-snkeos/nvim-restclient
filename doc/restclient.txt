@@ -1,0 +1,87 @@
+*restclient.txt*    Send HTTP requests from .http files in Neovim
+
+==============================================================================
+CONTENTS                                                   *restclient-contents*
+
+    1. Introduction .......... |restclient-introduction|
+    2. Requirements ........... |restclient-requirements|
+    3. Setup ................... |restclient-setup|
+    4. Commands ................. |restclient-commands|
+    5. File format ............... |restclient-format|
+    6. Variables ................... |restclient-variables|
+
+==============================================================================
+1. Introduction                                        *restclient-introduction*
+
+nvim-restclient lets you write HTTP requests in plain `.http`/`.rest` files
+and send them from Neovim, inspired by the vscode-restclient extension.
+Requests are sent with `curl` (via plenary.job), and the response is shown
+in a reusable split window.
+
+==============================================================================
+2. Requirements                                        *restclient-requirements*
+
+- Neovim 0.10+
+- `curl` on $PATH
+- plenary.nvim
+
+==============================================================================
+3. Setup                                                      *restclient-setup*
+
+>lua
+    require("restclient").setup({
+      split = "vertical",  -- or "horizontal"
+      timeout_ms = 30000,
+      curl_path = "curl",
+    })
+<
+
+==============================================================================
+4. Commands                                                *restclient-commands*
+
+:RestClientRun                                                 *:RestClientRun*
+    Send the request under the cursor. In visual mode, sends the selected
+    lines as a single request instead.
+
+:RestClientCancel                                           *:RestClientCancel*
+    Cancel the in-flight request, if any.
+
+==============================================================================
+5. File format                                                *restclient-format*
+
+>
+    METHOD URL [HTTP/1.1]
+    Header-Name: value
+    ...
+    <blank line>
+    body...
+<
+
+`METHOD` defaults to `GET` when omitted. Multiple requests in one file are
+separated by a line starting with `###`. Lines starting with `#` or `//`
+before the request line or among headers are comments.
+
+Query strings may continue on following lines:
+>
+    GET https://example.com/comments
+        ?page=2
+        &pageSize=10
+<
+
+==============================================================================
+6. Variables                                                *restclient-variables*
+
+Define file-level variables with `@name = value`, and reference them
+anywhere in the file (URL, headers, body) with `{{name}}`:
+>
+    @host = example.com
+    @token = {{host}}-secret
+
+    GET https://{{host}}/api
+    Authorization: Bearer {{token}}
+<
+
+Variable definitions are resolved top to bottom; later definitions of the
+same name override earlier ones.
+
+vim:tw=78:ts=8:ft=help:norl:
