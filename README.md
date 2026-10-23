@@ -46,7 +46,7 @@ With [lazy.nvim](https://github.com/folke/lazy.nvim):
 
 ```lua
 {
-  "yourname/nvim-restclient",
+  "daniel-eichinger-snkeos/nvim-restclient",
   dependencies = { "nvim-lua/plenary.nvim" },
   ft = { 'http', 'rest' },
   opts = {
