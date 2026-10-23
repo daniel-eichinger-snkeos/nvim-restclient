@@ -120,5 +120,46 @@ describe("restclient.parser", function()
       assert.is_nil(req)
       assert.is_not_nil(err)
     end)
+
+    it("captures a # @name annotation as the request name", function()
+      local req = parser.parse_request({
+        "# @name clientCredentialsClient",
+        "POST https://example.com/register",
+      })
+
+      assert.are.equal("clientCredentialsClient", req.name)
+    end)
+
+    it("captures a // @name annotation as the request name", function()
+      local req = parser.parse_request({
+        "// @name myRequest",
+        "GET https://example.com",
+      })
+
+      assert.are.equal("myRequest", req.name)
+    end)
+
+    it("leaves the name nil when there is no @name annotation", function()
+      local req = parser.parse_request({ "GET https://example.com" })
+
+      assert.is_nil(req.name)
+    end)
+
+    it("excludes trailing @name = value definitions from the body", function()
+      local req = parser.parse_request({
+        "# @name clientCredentialsClient",
+        "POST https://example.com/register",
+        "Content-Type: application/json",
+        "",
+        "{",
+        '  "client_name": "Test Client"',
+        "}",
+        "",
+        "@clientId = {{clientCredentialsClient.response.body.client_id}}",
+        "@clientSecret = {{clientCredentialsClient.response.body.client_secret}}",
+      })
+
+      assert.are.equal('{\n  "client_name": "Test Client"\n}', req.body)
+    end)
   end)
 end)

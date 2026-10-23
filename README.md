@@ -22,6 +22,7 @@ runtime dependency beyond `curl` and `plenary.nvim`.
 - ⚡ Send the request under the cursor, or a visual selection, with `:RestClientRun`
 - 🛑 Cancel an in-flight request with `:RestClientCancel`
 - 🔖 File-level variables (`@name = value`) with `{{name}}` substitution in the URL, headers, and body
+- 🔗 Named requests (`# @name id`) and request variables (`{{id.response.body.*}}` / `{{id.response.headers.*}}`) to chain requests
 - 🧵 Multi-line query strings (`?key=value` / `&key=value` continuation lines)
 - 📬 Response rendered in a reusable split: status, timing, size, headers, and a pretty-printed body (JSON auto-indented)
 - 🎨 Basic syntax highlighting and filetype detection for `.http`/`.rest`
@@ -119,6 +120,27 @@ body...
   are treated as comments.
 - `@name = value` defines a file-level variable, usable anywhere in the
   file via `{{name}}` (including in other variable definitions).
+
+### Request variables
+
+Name a request with a `# @name <id>` (or `// @name <id>`) comment line placed
+before its request line, then reference its response elsewhere in the file
+via `{{id.response.body.*}}` or `{{id.response.headers.*}}`:
+
+```http
+# @name registerClient
+POST {{baseUrl}}/oauth2/register
+Content-Type: application/json
+
+{ "client_name": "Test Client" }
+
+@clientId = {{registerClient.response.body.client_id}}
+
+###
+
+GET {{baseUrl}}/oauth2/register/{{clientId}}
+Accept: application/json
+```
 
 ## Configuration
 

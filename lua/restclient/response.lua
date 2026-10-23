@@ -16,7 +16,7 @@ end
 --- (the one belonging to the actual response) is returned.
 ---@param raw string
 ---@return table[] headers `{ { name, value }, ... }`
-local function parse_headers(raw)
+function M.parse_headers(raw)
   if not raw or trim(raw) == "" then
     return {}
   end
@@ -118,7 +118,7 @@ end
 ---@return string[] lines
 ---@return string filetype
 function M.build_lines(request, result)
-  local headers = parse_headers(result.headers_raw)
+  local headers = M.parse_headers(result.headers_raw)
   local time_ms = result.time_total and string.format("%dms", math.floor(result.time_total * 1000 + 0.5))
     or "?"
   local size = result.size_download and tostring(result.size_download) or "?"

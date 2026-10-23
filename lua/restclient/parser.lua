@@ -35,6 +35,14 @@ local function is_var_def(line)
   return line:match("^@[%w_%-%.]+%s*=") ~= nil
 end
 
+--- Extract the identifier from a `# @name <id>` / `// @name <id>` request
+--- naming annotation (the vscode-restclient convention), if the line is one.
+---@param line string
+---@return string|nil name
+local function match_name_annotation(line)
+  return line:match("^#%s*@name%s+(%S+)%s*$") or line:match("^//%s*@name%s+(%S+)%s*$")
+end
+
 --- Split buffer lines into blocks delimited by `###` lines.
 --- Each block records its 1-indexed start/finish line numbers (inclusive,
 --- referring to the original buffer) and the raw lines it contains
@@ -82,10 +90,13 @@ function M.parse_request(lines)
   local n = #lines
   local i = 1
   local request_line, request_idx
+  local name
 
   while i <= n do
     local line = trim(lines[i])
-    if line ~= "" and not is_comment(line) and not is_var_def(line) and not is_separator(line) then
+    if is_comment(line) then
+      name = match_name_annotation(line) or name
+    elseif line ~= "" and not is_var_def(line) and not is_separator(line) then
       request_line = line
       request_idx = i
       break
@@ -132,23 +143,30 @@ function M.parse_request(lines)
     if is_comment(line) or is_var_def(line) then
       i = i + 1
     else
-      local name, value = line:match("^([%w%-]+)%s*:%s*(.*)$")
-      if not name then
+      local header_name, value = line:match("^([%w%-]+)%s*:%s*(.*)$")
+      if not header_name then
         break
       end
-      table.insert(headers, { name = name, value = value })
+      table.insert(headers, { name = header_name, value = value })
       i = i + 1
     end
   end
 
-  -- Body: everything else, trimmed of trailing blank lines.
+  -- Body: everything else, trimmed of trailing blank lines and trailing
+  -- `@name = value` definitions (e.g. capturing values from this very
+  -- request's own response), which aren't part of the body.
   local body_lines = {}
   while i <= n do
     table.insert(body_lines, lines[i])
     i = i + 1
   end
-  while #body_lines > 0 and trim(body_lines[#body_lines]) == "" do
-    table.remove(body_lines)
+  while #body_lines > 0 do
+    local last = trim(body_lines[#body_lines])
+    if last == "" or is_var_def(last) then
+      table.remove(body_lines)
+    else
+      break
+    end
   end
 
   local body = nil
@@ -161,6 +179,7 @@ function M.parse_request(lines)
     url = url,
     headers = headers,
     body = body,
+    name = name,
   }
 end
 

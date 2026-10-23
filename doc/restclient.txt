@@ -9,6 +9,7 @@ CONTENTS                                                   *restclient-contents*
     4. Commands ................. |restclient-commands|
     5. File format ............... |restclient-format|
     6. Variables ................... |restclient-variables|
+    7. Request variables .......... |restclient-request-variables|
 
 ==============================================================================
 1. Introduction                                        *restclient-introduction*
@@ -84,5 +85,24 @@ anywhere in the file (URL, headers, body) with `{{name}}`:
 
 Variable definitions are resolved top to bottom; later definitions of the
 same name override earlier ones.
+
+==============================================================================
+7. Request variables                              *restclient-request-variables*
+
+Name a request with a `# @name <id>` (or `// @name <id>`) comment placed
+before its request line, then reference its response elsewhere in the file:
+>
+    # @name registerClient 
+    POST {{baseUrl}}/oauth2/register
+    Content-Type: application/json
+
+    { "client_name": "Test Client" }
+
+    @clientId = {{registerClient.response.body.client_id}}
+
+    ###
+
+    GET {{baseUrl}}/oauth2/register/{{clientId}}
+<
 
 vim:tw=78:ts=8:ft=help:norl:
