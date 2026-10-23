@@ -202,6 +202,7 @@ function M.show(request, result)
   vim.bo[buf].modifiable = true
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
   vim.bo[buf].modifiable = false
+  vim.bo[buf].modified = false
   vim.bo[buf].filetype = filetype
 
   open_window(buf, config.options.split)
@@ -215,6 +216,7 @@ function M.show_error(message)
   vim.bo[buf].modifiable = true
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split("Request failed:\n\n" .. message, "\n", { plain = true }))
   vim.bo[buf].modifiable = false
+  vim.bo[buf].modified = false
   vim.bo[buf].filetype = "text"
 
   open_window(buf, config.options.split)
