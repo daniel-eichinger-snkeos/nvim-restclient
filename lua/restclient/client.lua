@@ -40,7 +40,7 @@ local function parse_meta(stdout_lines)
   return {}
 end
 
-local function build_args(request, headerfile, bodyfile, timeout_ms)
+local function build_args(request, headerfile, bodyfile, timeout_ms, insecure)
   local args = {
     "-sS",
     "-L",
@@ -55,6 +55,10 @@ local function build_args(request, headerfile, bodyfile, timeout_ms)
     "-X",
     request.method,
   }
+
+  if insecure then
+    table.insert(args, "-k")
+  end
 
   for _, header in ipairs(request.headers) do
     table.insert(args, "-H")
@@ -83,7 +87,8 @@ function M.run(request, opts)
 
   local headerfile = vim.fn.tempname()
   local bodyfile = vim.fn.tempname()
-  local args = build_args(request, headerfile, bodyfile, config.options.timeout_ms)
+  local args =
+    build_args(request, headerfile, bodyfile, config.options.timeout_ms, config.options.insecure)
 
   local stdout_lines = {}
   local stderr_lines = {}

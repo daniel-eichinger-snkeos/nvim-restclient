@@ -127,6 +127,7 @@ require("restclient").setup({
   split = "vertical", -- or "horizontal"
   timeout_ms = 30000,
   curl_path = "curl",
+  insecure = true, -- pass `-k` to curl to skip TLS certificate verification
 })
 ```
 

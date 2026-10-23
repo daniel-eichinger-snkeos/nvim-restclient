@@ -4,12 +4,14 @@ local M = {}
 ---@field split "vertical"|"horizontal" Direction of the response split window.
 ---@field timeout_ms integer Request timeout in milliseconds.
 ---@field curl_path string Path to the curl executable.
+---@field insecure boolean Skip TLS certificate verification (curl -k).
 
 ---@type RestClientConfig
 M.defaults = {
   split = "vertical",
   timeout_ms = 30000,
   curl_path = "curl",
+  insecure = true,
 }
 
 ---@type RestClientConfig
